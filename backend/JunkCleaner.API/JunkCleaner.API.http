@@ -1,0 +1,6 @@
+@JunkCleaner.API_HostAddress = http://localhost:5145
+
+GET {{JunkCleaner.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="JunkCleaner.API/JunkCleaner.API.csproj" />
+  <Project Path="JunkCleaner.Core/JunkCleaner.Core.csproj" />
+</Solution>

@@ -1,0 +1,12 @@
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\bin\Debug\net10.0\JunkCleaner.Core.deps.json
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\bin\Debug\net10.0\JunkCleaner.Core.dll
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\bin\Debug\net10.0\JunkCleaner.Core.pdb
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\obj\Debug\net10.0\JunkCleaner.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\obj\Debug\net10.0\JunkCleaner.Core.AssemblyInfoInputs.cache
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\obj\Debug\net10.0\JunkCleaner.Core.AssemblyInfo.cs
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\obj\Debug\net10.0\JunkCleaner.Core.csproj.CoreCompileInputs.cache
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\obj\Debug\net10.0\JunkCleaner.Core.sourcelink.json
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\obj\Debug\net10.0\JunkCleaner.Core.dll
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\obj\Debug\net10.0\refint\JunkCleaner.Core.dll
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\obj\Debug\net10.0\JunkCleaner.Core.pdb
+C:\Projects\Junk-File-Cleaner\backend\JunkCleaner.Core\obj\Debug\net10.0\ref\JunkCleaner.Core.dll
