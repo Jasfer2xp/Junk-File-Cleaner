@@ -1,6 +1,8 @@
 {
   "name": "junk-file-cleaner",
   "version": "1.0.0",
+  "description": "A safe Windows desktop junk file cleaner with quarantine restore protection.",
+  "author": "Jasfer2xp",
   "main": "electron/main.js",
   "homepage": "./",
   "private": true,
@@ -13,8 +15,6 @@
     "axios": "^1.16.1",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
-    "electron": "^42.1.0",
-    "electron-builder": "^26.8.1",
     "postcss": "^8.5.14",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -51,7 +51,12 @@
       "last 1 safari version"
     ]
   },
+  "devDependencies": {
+    "electron": "^42.1.0",
+    "electron-builder": "^26.8.1"
+  },
   "build": {
+    "extends": null,
     "appId": "com.jasfer2xp.junkfilecleaner",
     "productName": "Junk File Cleaner",
     "directories": {
@@ -60,11 +65,21 @@
     "files": [
       "build/**/*",
       "electron/**/*",
-      "node_modules/**/*"
+      "public/app-icon.*"
+    ],
+    "extraResources": [
+      {
+        "from": "backend",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "win": {
       "target": "nsis",
-      "icon": "public/favicon.ico"
+      "icon": "public/app-icon.ico",
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,

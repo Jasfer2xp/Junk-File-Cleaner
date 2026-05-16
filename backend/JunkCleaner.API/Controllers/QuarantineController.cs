@@ -1,5 +1,6 @@
 using JunkCleaner.Core.Quarantine;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace JunkCleaner.API.Controllers
 {
@@ -8,12 +9,21 @@ namespace JunkCleaner.API.Controllers
     public class QuarantineController : ControllerBase
     {
         [HttpGet]
-        public IActionResult List()
+        public IActionResult List([FromQuery] int page = 0, [FromQuery] int pageSize = 100)
         {
             QuarantineManager.PurgeOldEntries(30);
-            var entries = QuarantineManager.LoadManifest();
-            var totalSize = QuarantineManager.GetQuarantineSize();
-            return Ok(new { entries, totalSizeBytes = totalSize, count = entries.Count });
+            var all = QuarantineManager.LoadManifest();
+            var totalSize = all.Sum(e => e.SizeBytes);
+            var paged = all.Skip(page * pageSize).Take(pageSize).ToList();
+            return Ok(new
+            {
+                entries = paged,
+                totalSizeBytes = totalSize,
+                count = all.Count,
+                page,
+                pageSize,
+                totalPages = (int)Math.Ceiling((double)all.Count / pageSize)
+            });
         }
 
         [HttpPost("restore/{id}")]
@@ -27,6 +37,10 @@ namespace JunkCleaner.API.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(string id)
         {
+            // Guard: don't match "purge" as an id
+            if (id.Equals("purge", StringComparison.OrdinalIgnoreCase))
+                return BadRequest(new { error = "Invalid id" });
+
             var success = QuarantineManager.PermanentlyDelete(id);
             if (!success) return NotFound(new { error = "Quarantine entry not found" });
             return Ok(new { message = "File permanently deleted" });
@@ -35,13 +49,10 @@ namespace JunkCleaner.API.Controllers
         [HttpDelete("purge/all")]
         public IActionResult PurgeAll()
         {
+            // Load once, delete all files, save empty manifest in one shot
             var entries = QuarantineManager.LoadManifest();
-            int count = 0;
-            foreach (var e in entries)
-            {
-                if (QuarantineManager.PermanentlyDelete(e.Id)) count++;
-            }
-            return Ok(new { message = $"Purged {count} files" });
+            int count = QuarantineManager.PurgeAll(entries);
+            return Ok(new { message = $"Purged {count} files", count });
         }
     }
 }

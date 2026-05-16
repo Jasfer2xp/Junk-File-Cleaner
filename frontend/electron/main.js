@@ -1,9 +1,13 @@
 const { app, BrowserWindow, shell } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
+const crypto = require("crypto");
+const http = require("http");
 
 let mainWindow = null;
 let backendProcess = null;
+const apiToken = crypto.randomBytes(32).toString("hex");
+process.env.JUNK_CLEANER_API_TOKEN = apiToken;
 
 // Always load from built files unless explicitly in CRA dev mode
 const isReactDevServer = process.env.REACT_DEV === "true";
@@ -22,6 +26,8 @@ function startBackend() {
       stdio: "ignore",
       detached: false,
       windowsHide: true,
+      cwd: backendDir,
+      env: { ...process.env, JUNK_CLEANER_API_TOKEN: apiToken },
     });
     backendProcess.on("error", (err) =>
       console.error("Backend error:", err.message)
@@ -33,10 +39,56 @@ function startBackend() {
     stdio: "ignore",
     detached: false,
     windowsHide: true,
+    cwd: path.dirname(backendExe),
+    env: { ...process.env, JUNK_CLEANER_API_TOKEN: apiToken },
   });
   backendProcess.on("error", (err) =>
     console.error("Failed to start backend:", err.message)
   );
+}
+
+function waitForBackend(timeoutMs = 45000) {
+  const started = Date.now();
+
+  return new Promise((resolve) => {
+    const check = () => {
+      const req = http.request(
+        {
+          hostname: "localhost",
+          port: 5000,
+          path: "/api/system/info",
+          method: "GET",
+          timeout: 1500,
+          headers: { "X-JunkCleaner-Token": apiToken },
+        },
+        (res) => {
+          res.resume();
+          if (res.statusCode && res.statusCode < 500) {
+            resolve(true);
+          } else {
+            retry();
+          }
+        }
+      );
+
+      req.on("error", retry);
+      req.on("timeout", () => {
+        req.destroy();
+        retry();
+      });
+      req.end();
+    };
+
+    const retry = () => {
+      if (Date.now() - started >= timeoutMs) {
+        resolve(false);
+        return;
+      }
+      setTimeout(check, 500);
+    };
+
+    check();
+  });
 }
 
 function createWindow() {
@@ -47,9 +99,11 @@ function createWindow() {
     minHeight: 640,
     backgroundColor: "#0f0f1a",
     title: "Junk File Cleaner",
+    icon: path.join(__dirname, "..", "public", "app-icon.png"),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      preload: path.join(__dirname, "preload.js"),
     },
     show: false,
     autoHideMenuBar: true,          // hides the File/Edit/View menu bar
@@ -79,12 +133,10 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   startBackend();
-
-  // Give backend a moment to start before loading the UI
-  const delay = app.isPackaged ? 3000 : 2000;
-  setTimeout(createWindow, delay);
+  await waitForBackend();
+  createWindow();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

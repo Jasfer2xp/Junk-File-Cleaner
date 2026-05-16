@@ -20,7 +20,7 @@ namespace JunkCleaner.Core.Detection
 
         private static readonly HashSet<string> CacheExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
-            ".cache", ".dat", ".db-shm", ".db-wal"
+            ".cache", ".db-shm", ".db-wal"
         };
 
         private static readonly string[] TempDirectoryKeywords = new[]
@@ -50,9 +50,17 @@ namespace JunkCleaner.Core.Detection
 
         public static bool IsProtectedPath(string path)
         {
+            var fullPath = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
             return ProtectedPaths.Any(p =>
-                !string.IsNullOrEmpty(p) &&
-                path.StartsWith(p, StringComparison.OrdinalIgnoreCase));
+            {
+                if (string.IsNullOrWhiteSpace(p)) return false;
+                var protectedPath = Path.GetFullPath(p).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+                return fullPath.Equals(protectedPath, StringComparison.OrdinalIgnoreCase) ||
+                       fullPath.StartsWith(protectedPath + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
+                       fullPath.StartsWith(protectedPath + Path.AltDirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         public static (bool isJunk, JunkCategory category, string reason) Evaluate(

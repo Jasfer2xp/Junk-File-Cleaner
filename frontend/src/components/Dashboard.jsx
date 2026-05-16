@@ -48,6 +48,7 @@ export default function Dashboard({ onScanStarted }) {
   const handleStartScan = async () => {
     try {
       setScanning(true);
+      setError(null); // clear any previous error before retrying
       const { scanId } = await startScan({
         scanTempFiles: settings.scanTempFiles,
         scanCacheFiles: settings.scanCacheFiles,
@@ -59,7 +60,7 @@ export default function Dashboard({ onScanStarted }) {
       });
       onScanStarted(scanId);
     } catch {
-      setError("Failed to start scan. Is the backend running?");
+      setError("Failed to start scan. Is the backend running on port 5000?");
       setScanning(false);
     }
   };
@@ -111,7 +112,7 @@ export default function Dashboard({ onScanStarted }) {
             <button
               id="btn-start-scan"
               onClick={handleStartScan}
-              disabled={scanning || !!error}
+              disabled={scanning}
               className="btn-primary text-lg px-8 py-4 glow"
             >
               {scanning ? (

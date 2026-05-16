@@ -37,6 +37,10 @@ namespace JunkCleaner.Core.Models
         public int ProgressPercent { get; set; }
         public List<JunkFileEntry> Results { get; set; } = new();
         public string? ErrorMessage { get; set; }
+
+        // Thread-safe backing fields for live update during parallel scan
+        public int _junkFilesFound;
+        public long _totalJunkBytes;
     }
 
     public enum ScanStatus

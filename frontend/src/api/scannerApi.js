@@ -1,11 +1,20 @@
 import axios from "axios";
 
 const BASE_URL = "http://localhost:5000/api";
+const API_TOKEN = window.junkCleaner?.apiToken || "";
+const authHeaders = API_TOKEN ? { "X-JunkCleaner-Token": API_TOKEN } : {};
 
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: 30000,
-  headers: { "Content-Type": "application/json" },
+  headers: { "Content-Type": "application/json", ...authHeaders },
+});
+
+// Separate instance with a long timeout for clean operations (many files)
+const apiLong = axios.create({
+  baseURL: BASE_URL,
+  timeout: 300000, // 5 minutes
+  headers: { "Content-Type": "application/json", ...authHeaders },
 });
 
 // ── System ────────────────────────────────────────────────
@@ -37,13 +46,13 @@ export const cancelScan = async (scanId) => {
 
 // ── Clean ─────────────────────────────────────────────────
 export const cleanFiles = async (scanId, fileIds) => {
-  const { data } = await api.post("/clean", { scanId, fileIds });
+  const { data } = await apiLong.post("/clean", { scanId, fileIds });
   return data;
 };
 
 // ── Quarantine ────────────────────────────────────────────
-export const getQuarantine = async () => {
-  const { data } = await api.get("/quarantine");
+export const getQuarantine = async (page = 0, pageSize = 100) => {
+  const { data } = await api.get(`/quarantine?page=${page}&pageSize=${pageSize}`);
   return data;
 };
 

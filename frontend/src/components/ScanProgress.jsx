@@ -6,31 +6,36 @@ export default function ScanProgress({ scanId, onComplete, onCancel }) {
   const [cancelling, setCancelling] = useState(false);
   const intervalRef = useRef(null);
 
+  const pollCallbackRef = useRef(null);
+
   useEffect(() => {
     if (!scanId) return;
-    pollStatus();
-    intervalRef.current = setInterval(pollStatus, 800);
-    return () => clearInterval(intervalRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scanId]);
 
-  const pollStatus = async () => {
-    try {
-      const s = await getScanStatus(scanId);
-      setStatus(s);
-      if (s.status === "Completed" || s.status === "Cancelled" || s.status === "Failed") {
-        clearInterval(intervalRef.current);
-        if (s.status === "Completed") {
-          const results = await getScanResults(scanId);
-          onComplete(results);
-        } else {
-          onCancel();
+    pollCallbackRef.current = async () => {
+      try {
+        const s = await getScanStatus(scanId);
+        setStatus(s);
+        if (s.status === "Completed" || s.status === "Cancelled" || s.status === "Failed") {
+          clearInterval(intervalRef.current);
+          if (s.status === "Completed") {
+            const results = await getScanResults(scanId);
+            onComplete(results);
+          } else {
+            onCancel();
+          }
         }
+      } catch {
+        // Network error during polling — stop and go back
+        clearInterval(intervalRef.current);
+        onCancel();
       }
-    } catch {
-      clearInterval(intervalRef.current);
-    }
-  };
+    };
+
+    // Kick off immediately then poll every 800ms
+    pollCallbackRef.current();
+    intervalRef.current = setInterval(() => pollCallbackRef.current?.(), 800);
+    return () => clearInterval(intervalRef.current);
+  }, [scanId, onComplete, onCancel]);
 
   const handleCancel = async () => {
     setCancelling(true);

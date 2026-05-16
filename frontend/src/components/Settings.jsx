@@ -21,6 +21,19 @@ function Toggle({ id, checked, onChange, label, description }) {
   );
 }
 
+const SETTINGS_KEY = "junkCleaner_settings";
+
+export const loadSavedSettings = () => {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+};
+
+export const saveSettingsToStorage = (settings) => {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch {}
+};
+
 export default function Settings() {
   const { settings, setSettings } = useContext(AppContext);
   const [newExclude, setNewExclude] = useState("");
@@ -42,6 +55,7 @@ export default function Settings() {
   };
 
   const handleSave = () => {
+    saveSettingsToStorage(settings);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

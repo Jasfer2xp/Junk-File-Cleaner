@@ -1,187 +1,77 @@
-# 🧹 Junk File Cleaner
+# Junk File Cleaner
 
-A free, open-source Windows desktop app that scans your PC for junk files, shows you what can be safely removed, and frees up disk space — with a quarantine system so nothing is lost permanently.
+A Windows desktop app for finding junk files, reviewing results, and safely moving selected files into quarantine before permanent deletion.
 
----
+## Features
 
-## ✨ Features
+- Scans temporary files, browser/app cache, old logs, duplicate files, and optional unused files.
+- Shows grouped scan results with selectable files.
+- Moves cleaned files to `%APPDATA%\JunkCleaner\Quarantine`.
+- Supports restore, single delete, and purge-all quarantine actions.
+- Ships as an Electron desktop app with a self-contained ASP.NET Core backend.
 
-- 🔍 **Smart Scanning** — Detects temp files, cache, old logs, and duplicate files (MD5 hash)
-- 📊 **Visual Results** — See exactly what's taking up space, grouped by category
-- 🛡️ **Safe Quarantine** — Files are moved to quarantine before deletion, never permanently erased
-- ↩️ **Restore Anytime** — Recover any quarantined file with one click (30-day window)
-- ⚙️ **Customizable** — Exclude folders, toggle scan categories, adjust thresholds
-- 🌙 **Dark Mode** — Premium dark UI with Inter font and indigo accent colors
+## Requirements for Development
 
----
+| Tool | Version |
+| ---- | ------- |
+| Node.js | 18+ |
+| npm | 9+ |
+| .NET SDK | 10+ |
+| Windows | 10/11 |
 
-## 🖥️ Screenshot
+## Development
 
-Dashboard showing real-time disk usage from the C# API backend.
-
----
-
-## 🚀 Getting Started
-
-### Requirements
-
-| Tool | Download |
-|------|----------|
-| Node.js 18+ | https://nodejs.org |
-| .NET SDK 8+ | https://dotnet.microsoft.com/download |
-| Git | https://git-scm.com |
-
-### Option A — One-Click Dev Start (Easiest)
-
-```bash
-git clone https://github.com/Jasfer2xp/Junk-File-Cleaner.git
-cd Junk-File-Cleaner
+```bat
 start-dev.bat
 ```
 
-This opens 3 windows: backend (port 5000), React dev server (port 3000), and Electron.
+This starts the React dev server, Electron shell, and local backend together.
 
-### Option B — Manual Start
+Manual startup:
 
-```bash
-# Terminal 1 — Backend
-cd backend/JunkCleaner.API
-dotnet run
-
-# Terminal 2 — Frontend
+```bat
 cd frontend
 npm install
-npm start
-
-# Terminal 3 — Electron
-cd frontend
-npm run electron
+npm run electron:dev
 ```
 
----
+## Build the Installer
 
-## 🏗️ Project Structure
-
-```
-Junk-File-Cleaner/
-├── backend/
-│   ├── JunkCleaner.API/            ← ASP.NET Core REST API (port 5000)
-│   │   ├── Controllers/
-│   │   │   ├── ScanController.cs   ← Scan, results, clean endpoints
-│   │   │   └── QuarantineController.cs
-│   │   └── Program.cs
-│   └── JunkCleaner.Core/           ← Scanning & quarantine logic
-│       ├── Scanning/FileScanner.cs ← Async scanner with progress tracking
-│       ├── Detection/JunkDetector.cs ← Junk classification rules
-│       ├── Quarantine/QuarantineManager.cs
-│       └── Models/ScanModels.cs
-└── frontend/
-    ├── electron/main.js            ← Electron desktop wrapper
-    ├── src/
-    │   ├── components/
-    │   │   ├── Dashboard.jsx       ← Home with disk usage & scan button
-    │   │   ├── ScanProgress.jsx    ← Live animated progress screen
-    │   │   ├── Results.jsx         ← Grouped file results with checkboxes
-    │   │   ├── Quarantine.jsx      ← Restore/delete quarantined files
-    │   │   ├── Settings.jsx        ← Toggles, thresholds, exclusions
-    │   │   └── Sidebar.jsx         ← Navigation sidebar
-    │   ├── api/scannerApi.js       ← All Axios calls to backend
-    │   ├── App.jsx                 ← Root component + state management
-    │   └── index.js
-    ├── start-dev.bat               ← One-click dev launcher
-    └── build-installer.bat         ← Build the .exe installer
-```
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Desktop | Electron |
-| UI | React + Tailwind CSS v3 |
-| Backend | C# ASP.NET Core (port 5000) |
-| HTTP Client | Axios |
-| Duplicate detection | MD5 hashing |
-| Packaging | electron-builder (NSIS installer) |
-
----
-
-## 🧠 How It Works
-
-1. **Scan** — C# backend recursively scans Temp folders, browser caches, and selected directories
-2. **Detect** — Files classified by extension (`.tmp`, `.log`, `.cache`), age, location, and MD5 duplicate hash
-3. **Report** — Results sent to React frontend via REST API with progress polling
-4. **Clean** — Selected files moved to `%APPDATA%\JunkCleaner\Quarantine\` (never deleted)
-5. **Restore** — Restore any file to its original location within 30 days
-
----
-
-## 🗂️ What Gets Scanned
-
-| Category | Examples |
-|----------|----------|
-| Temp Files | `*.tmp`, `*.temp`, `*.bak`, Windows Temp folder |
-| Cache | Browser caches (Chrome, Firefox, Edge, Brave), app cache |
-| Old Logs | `*.log` files older than 30 days |
-| Duplicates | Identical files detected by MD5 hash |
-| Unused Files | Files not modified in 6+ months (optional) |
-
----
-
-## 🚫 Never Touched
-
-- `C:\Windows\System32`
-- `C:\Program Files`
-- `C:\Program Files (x86)`
-- Any folder you add to the exclusion list in Settings
-
----
-
-## 📡 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/system/info` | Disk usage stats |
-| POST | `/api/scan/start` | Start async scan, returns scan ID |
-| GET | `/api/scan/status/{id}` | Poll progress (%, files scanned, junk found) |
-| GET | `/api/results/{id}` | Full junk file list |
-| POST | `/api/scan/cancel/{id}` | Cancel running scan |
-| POST | `/api/clean` | Move selected files to quarantine |
-| GET | `/api/quarantine` | List quarantined files |
-| POST | `/api/quarantine/restore/{id}` | Restore file to original path |
-| DELETE | `/api/quarantine/{id}` | Permanently delete from quarantine |
-| DELETE | `/api/quarantine/purge/all` | Purge all quarantined files |
-
----
-
-## 📦 Building the Installer
-
-```bash
+```bat
 build-installer.bat
-# Output: frontend/dist/Junk File Cleaner Setup 1.0.0.exe
 ```
 
----
+The script:
 
-## 🤝 Contributing
+1. Publishes the backend as a self-contained `win-x64` executable.
+2. Builds the React frontend.
+3. Packages the Windows NSIS installer.
 
-1. Fork the repo
-2. Create a branch: `git checkout -b feature/your-feature`
-3. Commit: `git commit -m "Add your feature"`
-4. Push: `git push origin feature/your-feature`
-5. Open a Pull Request
+Output:
 
----
+```text
+frontend\dist\Junk File Cleaner Setup 1.0.0.exe
+```
 
-## 📄 License
+Upload that `.exe` as a GitHub Release asset for users to download. Keep generated folders such as `frontend/dist`, `frontend/backend`, `frontend/build`, and `backend/**/bin|obj` out of source commits.
 
-MIT License — free to use, modify, and distribute.
+## Architecture
 
-## 👤 Author
+```text
+frontend/
+  electron/          Electron main/preload process
+  src/               React UI
+  public/            App icons and static assets
 
-**Jasfer2xp** — [GitHub](https://github.com/Jasfer2xp)
+backend/
+  JunkCleaner.API/   Local ASP.NET Core REST API
+  JunkCleaner.Core/  Scanner, detector, quarantine logic
+```
 
----
+The Electron process starts the backend and passes a per-launch API token to the frontend through a preload bridge. The frontend sends that token as `X-JunkCleaner-Token` on API requests.
 
-⭐ If this project helped you, give it a star on GitHub!
+## Important Notes
+
+- The app is unsigned by default. Windows SmartScreen may warn users until you sign releases with a code-signing certificate.
+- The backend listens on `http://localhost:5000`.
+- Quarantined files are kept under the current user's AppData folder.

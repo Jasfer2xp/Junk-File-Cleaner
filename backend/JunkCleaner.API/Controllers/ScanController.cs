@@ -12,7 +12,13 @@ namespace JunkCleaner.API.Controllers
         [HttpGet("system/info")]
         public ActionResult<SystemInfo> GetSystemInfo()
         {
-            var drive = new System.IO.DriveInfo("C");
+            var drive = System.IO.DriveInfo.GetDrives()
+                .FirstOrDefault(d => d.IsReady && d.Name.StartsWith("C", StringComparison.OrdinalIgnoreCase))
+                ?? System.IO.DriveInfo.GetDrives().FirstOrDefault(d => d.IsReady);
+
+            if (drive == null)
+                return StatusCode(503, new { error = "No ready disk drive was found." });
+
             return Ok(new SystemInfo
             {
                 DriveName = drive.Name,
@@ -82,22 +88,25 @@ namespace JunkCleaner.API.Controllers
             var session = FileScanner.GetSession(request.ScanId);
             if (session == null) return NotFound(new { error = "Scan session not found" });
 
-            var cleaned = new List<object>();
-            var failed = new List<object>();
+            // Use HashSet for O(1) lookup — critical when cleaning thousands of files
+            var fileIdSet = new HashSet<string>(request.FileIds, StringComparer.OrdinalIgnoreCase);
+            var toClean = session.Results.FindAll(r => fileIdSet.Contains(r.Id));
+            var notFound = request.FileIds
+                .FindAll(id => !session.Results.Exists(r => r.Id == id))
+                .Select(id => new { id, reason = "Not found in scan session" });
 
-            foreach (var fileId in request.FileIds)
+            // Quarantine all in parallel with a single manifest write
+            var (succeeded, failedIds) = QuarantineManager.QuarantineBatch(toClean);
+            var failed = failedIds.Select(id => new { id, reason = "Could not quarantine (file in use or already removed)" });
+            var failedList = failed.Concat(notFound).ToList();
+
+            return Ok(new
             {
-                var junkFile = session.Results.Find(r => r.Id == fileId);
-                if (junkFile == null) { failed.Add(new { id = fileId, reason = "Not found" }); continue; }
-
-                var entry = QuarantineManager.QuarantineFile(junkFile);
-                if (entry != null)
-                    cleaned.Add(new { id = fileId, quarantineId = entry.Id, fileName = entry.FileName });
-                else
-                    failed.Add(new { id = fileId, reason = "Could not quarantine (file may be in use or already removed)" });
-            }
-
-            return Ok(new { cleaned, failed, cleanedCount = cleaned.Count, failedCount = failed.Count });
+                cleaned = succeeded.Select(e => new { quarantineId = e.Id, fileName = e.FileName }),
+                failed = failedList,
+                cleanedCount = succeeded.Count,
+                failedCount = failedList.Count
+            });
         }
     }
 }

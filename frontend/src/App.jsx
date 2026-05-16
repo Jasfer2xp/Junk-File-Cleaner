@@ -4,6 +4,7 @@ import Dashboard from "./components/Dashboard";
 import ScanProgress from "./components/ScanProgress";
 import Results from "./components/Results";
 import Quarantine from "./components/Quarantine";
+import { loadSavedSettings } from "./components/Settings";
 import Settings from "./components/Settings";
 
 export const AppContext = React.createContext();
@@ -12,7 +13,7 @@ export default function App() {
   const [page, setPage] = useState("dashboard");
   const [scanId, setScanId] = useState(null);
   const [scanResults, setScanResults] = useState(null);
-  const [settings, setSettings] = useState({
+  const defaultSettings = {
     scanTempFiles: true,
     scanCacheFiles: true,
     scanOldLogs: true,
@@ -21,7 +22,11 @@ export default function App() {
     unusedFileMonths: 6,
     excludedPaths: [],
     darkMode: true,
-  });
+  };
+  const [settings, setSettings] = useState(() => ({
+    ...defaultSettings,
+    ...(loadSavedSettings() || {}),
+  }));
 
   const handleScanStarted = (id) => {
     setScanId(id);
