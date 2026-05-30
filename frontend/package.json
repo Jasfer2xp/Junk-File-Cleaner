@@ -1,12 +1,13 @@
 {
   "name": "junk-file-cleaner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A safe Windows desktop junk file cleaner with quarantine restore protection.",
   "author": "Jasfer2xp",
   "main": "electron/main.js",
   "homepage": "./",
   "private": true,
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -21,7 +22,9 @@
     "react-scripts": "5.0.1",
     "tailwindcss": "^3.4.19",
     "wait-on": "^9.0.10",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "electron": "^42.1.0",
+    "electron-builder": "^26.8.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -51,14 +54,11 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "electron": "^42.1.0",
-    "electron-builder": "^26.8.1"
-  },
   "build": {
     "extends": null,
     "appId": "com.jasfer2xp.junkfilecleaner",
     "productName": "Junk File Cleaner",
+    "artifactName": "Junk File Cleaner Installer ${version}.${ext}",
     "directories": {
       "output": "dist"
     },
@@ -79,12 +79,23 @@
     "win": {
       "target": "nsis",
       "icon": "public/app-icon.ico",
+      "requestedExecutionLevel": "asInvoker",
       "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
+      "installerIcon": "public/app-icon.ico",
+      "uninstallerIcon": "public/app-icon.ico",
+      "installerHeaderIcon": "public/app-icon.ico",
+      "uninstallDisplayName": "Junk File Cleaner",
+      "shortcutName": "Junk File Cleaner",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
     }
   }
 }

@@ -63,7 +63,7 @@ function waitForBackend(timeoutMs = 45000) {
         },
         (res) => {
           res.resume();
-          if (res.statusCode && res.statusCode < 500) {
+          if (res.statusCode === 200) {
             resolve(true);
           } else {
             retry();
