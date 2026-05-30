@@ -18,6 +18,8 @@ Junk File Cleaner Installer 1.0.1.exe
 
 Clicking the button downloads the installer. Windows will ask you to open/run the downloaded `.exe`; GitHub README files cannot start installers automatically for security reasons.
 
+If the direct download link shows a GitHub `404`, create a GitHub Release first and upload the installer with the exact filename shown above. Until the Release asset exists, GitHub has no `.exe` file to download.
+
 If you are building locally, the installer is created here:
 
 ```text
