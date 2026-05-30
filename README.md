@@ -8,9 +8,15 @@ It is built for safe cleanup: review first, quarantine first, restore anytime wh
 
 Download the latest Windows installer from the **Releases** page:
 
+[![Download for Windows](https://img.shields.io/badge/Download-Windows%20Installer-2563eb?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Jasfer2xp/Junk-File-Cleaner/releases/latest/download/Junk%20File%20Cleaner%20Installer%201.0.1.exe)
+
+[Download Junk File Cleaner for Windows](https://github.com/Jasfer2xp/Junk-File-Cleaner/releases/latest/download/Junk%20File%20Cleaner%20Installer%201.0.1.exe)
+
 ```text
 Junk File Cleaner Installer 1.0.1.exe
 ```
+
+Clicking the button downloads the installer. Windows will ask you to open/run the downloaded `.exe`; GitHub README files cannot start installers automatically for security reasons.
 
 If you are building locally, the installer is created here:
 
